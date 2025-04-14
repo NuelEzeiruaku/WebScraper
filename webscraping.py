@@ -3,12 +3,15 @@ import requests
 import re
 from email.message import EmailMessage
 import smtplib
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 
 # sending message
 def send_email(subject, body):
     email = "kamsonuel@yahoo.com"
-    password = "apanuzwgmcgyxgvh"
+    password = os.getenv("EMAIL_PASSWORD")
     to = "kamsonuel@yahoo.com"
 
     msg = EmailMessage()
@@ -68,8 +71,11 @@ for item in sorted_items:
 # sending email
 if sorted_items:
     subject = f"Yo, Newegg Alert. A new update regarding your items: {search_term}"
-    body = ""
-    for item in sorted_items[:5]:  # only include top 5 cheapest item
-        body += f"{item[0]}\n${item[1]['price']}\n{item[1]['link']}\n\n"
+    body = "Here are the top 5 cheapest items for your search:\n\n"
+for item in sorted_items[:5]:  # only include top 5 cheapest items
+    body += f"Item: {item[0]}\n"
+    body += f"Price: ${item[1]['price']}\n"
+    body += f"Link: {item[1]['link']}\n\n"
 
-    send_email(subject, body)
+send_email(subject, body)
+
