@@ -1,7 +1,27 @@
 from bs4 import BeautifulSoup
 import requests
 import re
+from email.message import EmailMessage
+import smtplib
 
+
+# sending message
+def send_email(subject, body):
+    email = "kamsonuel@yahoo.com"
+    password = "apanuzwgmcgyxgvh"
+    to = "kamsonuel@yahoo.com"
+
+    msg = EmailMessage()
+    msg.set_content(body)
+    msg["Subject"] = subject
+    msg["From"] = email
+    msg["To"] = to
+
+    with smtplib.SMTP_SSL("smtp.mail.yahoo.com", 465) as smtp:
+        smtp.login(email, password)
+        smtp.send_message(msg)
+
+# web scraper
 search_term = input("What product would you like to search for? : ")
 
 url = f"https://www.newegg.ca/p/pl?d={search_term}&N=4131"
@@ -14,12 +34,9 @@ if page_text:
     try:
         pages = int(pages)
     except ValueError:
-        #print("Failed to extract number of pages, defaulting to 1 page.")
-        pages = 1  
+        pages = 1
 else:
-    #print("No pagination element found. Defaulting to 1 page.")
-    pages = 1  
- 
+    pages = 1
 
 items_found = {}
 
@@ -32,18 +49,27 @@ for page_number in range(1, pages + 1):
     if div:
         for product in div:
             try:
-                name = product.find("a", class_="item-title").text.strip()  
-                link = product.find("a", class_="item-title")["href"]  
-                price = product.find("li", class_="price-current").find("strong").text.strip().replace(",", "")  
-                
-                items_found[name] = {"price": int(price), "link": link}
+                name = product.find("a", class_="item-title").text.strip() # name 
+                link = product.find("a", class_="item-title")["href"] # the link
+                price = product.find("li", class_="price-current").find("strong").text.strip().replace(",", "") # the link
+                items_found[name] = {"price": int(price), "link": link} # the link
             except AttributeError:
-                pass  
+                pass
 
+# sort and "display"
 sorted_items = sorted(items_found.items(), key=lambda x: x[1]['price'])
 
 for item in sorted_items:
-    print(item[0])  
-    print(f"${item[1]['price']}")  
-    print(item[1]['link'])  
+    print(item[0])
+    print(f"${item[1]['price']}")
+    print(item[1]['link'])
     print("---------------------------------")
+
+# sending email
+if sorted_items:
+    subject = f"Yo, Newegg Alert. A new update regarding your items: {search_term}"
+    body = ""
+    for item in sorted_items[:5]:  # only include top 5 cheapest item
+        body += f"{item[0]}\n${item[1]['price']}\n{item[1]['link']}\n\n"
+
+    send_email(subject, body)
