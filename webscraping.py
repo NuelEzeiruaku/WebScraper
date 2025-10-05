@@ -18,8 +18,8 @@ logging.basicConfig(
 
 load_dotenv()
 
-# configure search terms - replace manual input with predefined list
-SEARCH_TERMS = ["graphics card", "monitor", "SSD"]  # add your desired search terms
+# configure search terms 
+SEARCH_TERMS = ["graphics card", "monitor", "SSD"]  # search terms
 
 def send_email(subject, body):
     email = "kamsonuel@yahoo.com"
@@ -82,7 +82,7 @@ def scrape_products(search_term):
                         logging.debug(f"Error parsing product: {str(e)}")
                         continue
             
-            # brief pause between page requests to be respectful
+            #  pause between page requests
             time.sleep(2)
             
         return items_found
@@ -115,12 +115,12 @@ def run_scraper():
         # pause between different search terms
         time.sleep(5)
 
-# schedule the job - examples
+# schedule the job
 def setup_schedule():
     # run once a day at 9 am
     schedule.every().day.at("09:00").do(run_scraper)
     
-    # alternatively, run every 12 hours
+    # run every 12 hours
     # schedule.every(12).hours.do(run_scraper)
     
     logging.info("Scheduler set up successfully")
@@ -128,7 +128,7 @@ def setup_schedule():
     # run immediately once at startup
     run_scraper()
     
-    # keep the script running
+    # keep script running
     while True:
         schedule.run_pending()
         time.sleep(60)  # check for pending tasks every minute
